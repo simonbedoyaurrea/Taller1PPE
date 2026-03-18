@@ -10,6 +10,9 @@ export default function SerieMaker() {
   const [poster, setPoster] = useState("");
   const [series, setSeries] = useState([]);
   const [modoEdicion, setModoEdicion] = useState(false);
+  const [search, setSearch] = useState("");
+  const [editingSerieId, setEditingSerieId] = useState(null);
+  const [notification, setNotification] = useState("");
 
   const handleEditSerie = (currentSerie) => {
     setTitle(currentSerie.title);
@@ -18,13 +21,94 @@ export default function SerieMaker() {
     setOverview(currentSerie.overview);
     setPoster(currentSerie.poster);
     setModoEdicion(true);
+    setEditingSerieId(currentSerie.id);
   };
 
-  const ponerModoCreacion = () => {};
+  const ponerModoCreacion = () => {
+    setTitle("");
+    setDate("");
+    setPopularity("");
+    setOverview("");
+    setPoster("");
+    setModoEdicion(false);
+  };
+
   const addSerie = async () => {
     if (modoEdicion) {
+      const { data, error } = await supabase
+        .from("series")
+        .update({
+          poster,
+          popularity,
+          title,
+          overview,
+          release_date: date,
+        })
+        .eq("id", editingSerieId)
+        .select();
+
+      if (error) {
+        console.log("error al actualizar", error);
+        setNotification("Error al actualizar");
+        setTimeout(() => setNotification(null), 3000);
+        return;
+      }
+      setSeries((prev) =>
+        prev.map((s) => (s.id === editingSerieId ? data[0] : s)),
+      );
+
+      setNotification("Serie actualizada");
+      setTimeout(() => setNotification(null), 3000);
     } else {
+      const { data, error } = await supabase
+        .from("series")
+        .insert([{ poster, popularity, title, overview, release_date: date }])
+        .select();
+
+      if (error) {
+        console.log("error al crear una serie", error);
+        setNotification("Error al crear serie");
+        setTimeout(() => setNotification(null), 3000);
+        return;
+      }
+
+      if (data && data.length > 0) {
+        setSeries((prev) => [...prev, data[0]]);
+      }
+
+      setNotification("Serie creada correctamente");
+      setTimeout(() => setNotification(null), 3000);
     }
+
+    setTitle("");
+    setDate("");
+    setPopularity("");
+    setOverview("");
+    setPoster("");
+    setModoEdicion(false);
+    setEditingSerieId(null);
+  };
+
+  const searchSeries = async (value) => {
+    setSearch(value);
+
+    if (!value) {
+      const { data } = await supabase.from("series").select("*");
+      if (data) setSeries(data);
+      return;
+    }
+
+    const { data, error } = await supabase
+      .from("series")
+      .select("*")
+      .ilike("title", `%${value}%`);
+
+    if (error) {
+      console.log("error buscando series", error);
+      return;
+    }
+
+    setSeries(data);
   };
 
   const deleteSerie = async (id) => {
@@ -60,18 +144,26 @@ export default function SerieMaker() {
 
       <div className="flex gap-10">
         <section className="w-1/2  text-white rounded-2xl p-8 shadow-lg">
-          <div
-            className={`rounded-3xl w-40  py-2 px-4 flex items-center gap-2 ${modoEdicion ? "bg-sky-500 " : "bg-green-500"}`}
-          >
-            {modoEdicion ? (
-              <>
-                <Pen /> Editando
-              </>
-            ) : (
-              <>
-                <Hammer /> Creando
-              </>
-            )}
+          <div className="flex gap-2 p-2">
+            <div
+              className={`rounded-3xl w-40  py-2 px-4 flex items-center gap-2 ${modoEdicion ? "bg-sky-500 " : "bg-green-500"}`}
+            >
+              {modoEdicion ? (
+                <>
+                  <Pen /> Editando
+                </>
+              ) : (
+                <>
+                  <Hammer /> Creando
+                </>
+              )}
+            </div>
+            <button
+              onClick={ponerModoCreacion}
+              className={`rounded-full bg-green-500 p-2 ${modoEdicion ? "" : "opacity-0"} cursor-pointer`}
+            >
+              <Hammer />
+            </button>
           </div>
           <div className="flex justify-center mb-8 bg-">
             <div className="relative w-72 h-96 overflow-hidden rounded-xl border-2 border-yellow-400 shadow-lg">
@@ -157,9 +249,9 @@ export default function SerieMaker() {
               <button
                 type="button"
                 onClick={addSerie}
-                className="bg-yellow-400 text-black font-bold px-6 py-2 rounded-full hover:scale-105 transition-transform"
+                className={`${modoEdicion ? "bg-blue-500" : "bg-yellow-400"} text-black font-bold px-6 py-2 rounded-full hover:scale-105 transition-transform`}
               >
-                Añadir serie
+                {modoEdicion ? "Actualizar Serie" : "Crear Serie"}
               </button>
             </div>
           </form>
@@ -171,11 +263,22 @@ export default function SerieMaker() {
               Series creadas
             </h2>
 
+            {/* BUSCADOR */}
+            <div className="mb-4">
+              <input
+                type="text"
+                placeholder="Buscar serie..."
+                value={search}
+                onChange={(e) => searchSeries(e.target.value)}
+                className="w-full px-3 py-2 rounded-lg bg-black border border-yellow-400 text-white focus:outline-none focus:ring-2 focus:ring-yellow-400"
+              />
+            </div>
+
             <div className="grid grid-cols-4 gap-4">
               {series &&
                 series.map((s) => (
                   <div
-                    className="overflow-hidden rounded-lg border border-yellow-400 cursor-pointer  relative"
+                    className="overflow-hidden rounded-lg border border-yellow-400 cursor-pointer relative"
                     key={s.id}
                   >
                     <img
@@ -203,6 +306,11 @@ export default function SerieMaker() {
           </div>
         </section>
       </div>
+      {notification && (
+        <div className="fixed bottom-5 right-5 border-4 w-56 border-l-amber-800 bg-gray-400 text-black px-4 py-2 rounded shadow">
+          {notification}
+        </div>
+      )}
     </div>
   );
 }

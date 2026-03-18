@@ -36,7 +36,7 @@ const LandingPage = ({ setActiveTab }) => {
             Muestra tus conocimientos cinematográficos en este juego
           </p>
           <button
-            className="inline-flex items-center gap-3 bg-primary text-bg-darker px-8 py-4 rounded-full text-lg font-bold transition-all duration-200 "
+            className="inline-flex items-center gap-3 bg-primary text-bg-darker px-8 py-4 rounded-full text-lg font-bold transition-all duration-200 cursor-pointer "
             onClick={() => setActiveTab("game")}
           >
             <Play size={20} fill="currentColor" /> JUEGA AHORA
@@ -46,7 +46,7 @@ const LandingPage = ({ setActiveTab }) => {
 
       <section className="px-[5%] py-16">
         <h2 className="text-[2.5rem] mb-12 text-center">
-          Featured Movies in the Game
+          Peliculas disponibles en el juego
         </h2>
         <div className="grid grid-cols-[repeat(auto-fill,minmax(250px,1fr))] gap-8">
           {movies.map((movie) => (

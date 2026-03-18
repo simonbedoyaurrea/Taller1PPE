@@ -1,8 +1,5 @@
-arreglar tarjetas para que se vean mejor   - melo
+
 añadir el series maker con el CRUD - parcial
 mejorar la interfaz del login y el registro  - parcial
-mejorar la interfaz del juego de peliculas  - melo 
 conectar los puntajes maximos al juego de pleiculas - falta
-barra de busqueda  - falta 
-ver que pasa si pongo a editar una serie y mientras la borro
-me gustaria mostrar solo los botones ede edicion y eliminar solo al hacer hover
+me gustaria mostrar solo los botones ede edicion y eliminar solo al hacer hovers

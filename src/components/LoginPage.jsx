@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { supabase } from "../supabaseClient";
-import { LogIn } from "lucide-react";
+import { Film, LogIn } from "lucide-react";
 
 const LoginPage = ({ setCurrentPage, setUser, onLoginSuccess }) => {
   const [email, setEmail] = useState("");
@@ -40,7 +40,8 @@ const LoginPage = ({ setCurrentPage, setUser, onLoginSuccess }) => {
     <div className="min-h-screen bg-black flex items-center justify-center">
       <div className="bg-white rounded-lg shadow-xl p-8 w-full max-w-md">
         <div className="flex items-center justify-center mb-6">
-          <h1 className="text-3xl font-bold text-gray-800">Login</h1>
+          <Film className="text-primary" size={28} />
+          <h1 className="text-3xl font-bold text-gray-800">Login </h1>
         </div>
 
         <form onSubmit={handleLogin} className="space-y-4">

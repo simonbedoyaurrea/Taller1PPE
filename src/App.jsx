@@ -49,7 +49,7 @@ function App() {
   }
 
   // Si no está logueado y intenta acceder al juego, mostrar login
-  if (!user && activeTab === "game") {
+  if ((!user && activeTab === "game") || (!user && activeTab === "series")) {
     return (
       <>
         {currentPage === "login" && (
@@ -82,7 +82,7 @@ function App() {
       <main className="flex-1 flex flex-col">
         {activeTab === "home" && <LandingPage setActiveTab={setActiveTab} />}
         {activeTab === "game" && user && <GamePage />}
-        {activeTab === "series" && <SerieMaker />}
+        {activeTab === "series" && user && <SerieMaker />}
       </main>
     </div>
   );

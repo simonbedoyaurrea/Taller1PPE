@@ -54,7 +54,7 @@ const RegisterPage = ({ setCurrentPage, setUser, onLoginSuccess }) => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-600 to-purple-600 flex items-center justify-center">
+    <div className="min-h-screen bg-black flex items-center justify-center">
       <div className="bg-white rounded-lg shadow-xl p-8 w-full max-w-md">
         <div className="flex items-center justify-center mb-6">
           <UserPlus className="w-8 h-8 text-blue-600 mr-2" />

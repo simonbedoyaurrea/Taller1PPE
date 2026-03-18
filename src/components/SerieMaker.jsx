@@ -73,7 +73,7 @@ export default function SerieMaker() {
       }
 
       if (data && data.length > 0) {
-        setSeries((prev) => [...prev, data[0]]);
+        setSeries((prev) => [data[0], ...prev]);
       }
 
       setNotification("Serie creada correctamente");
@@ -243,8 +243,6 @@ export default function SerieMaker() {
                 />
               </div>
             </div>
-
-            {/* BOTÓN */}
             <div className="mt-6 flex justify-center">
               <button
                 type="button"
@@ -257,13 +255,12 @@ export default function SerieMaker() {
           </form>
         </section>
 
-        <section className="w-1/2 flex flex-col gap-6">
+        <section className="w-1/2 flex flex-col gap-6 ">
           <div className="bg-black border border-yellow-400 rounded-2xl p-6 shadow-lg flex-1">
             <h2 className="text-xl font-bold text-white mb-4 border-b border-yellow-400 pb-2">
               Series creadas
             </h2>
 
-            {/* BUSCADOR */}
             <div className="mb-4">
               <input
                 type="text"
@@ -274,27 +271,27 @@ export default function SerieMaker() {
               />
             </div>
 
-            <div className="grid grid-cols-4 gap-4">
+            <div className="grid grid-cols-4 gap-4 h-[800px] overflow-y-scroll">
               {series &&
                 series.map((s) => (
                   <div
-                    className="overflow-hidden rounded-lg border border-yellow-400 cursor-pointer relative"
+                    className="overflow-hidden h-52 rounded-lg border border-yellow-400 cursor-pointer relative group"
                     key={s.id}
                   >
                     <img
-                      className="w-full h-40 object-cover"
+                      className="w-full h-56 object-cover"
                       src={s.poster}
                       alt=""
                     />
-                    <div className="absolute flex gap-2 top-0 p-2 right-0">
+                    <div className="absolute flex gap-2 top-0 p-2 right-0 opacity-0 group-hover:opacity-100 transition-opacity">
                       <button
-                        className="bg-red-700 text-white p-2 rounded-2xl cursor-pointer"
+                        className="bg-red-600/70 text-white p-2 rounded-2xl cursor-pointer"
                         onClick={() => deleteSerie(s.id)}
                       >
                         <Trash />
                       </button>
                       <button
-                        className="bg-blue-950 rounded-4xl p-2 text-white cursor-pointer"
+                        className="bg-blue-600/70 rounded-4xl p-2 text-white cursor-pointer"
                         onClick={() => handleEditSerie(s)}
                       >
                         <Pen />
@@ -307,8 +304,47 @@ export default function SerieMaker() {
         </section>
       </div>
       {notification && (
-        <div className="fixed bottom-5 right-5 border-4 w-56 border-l-amber-800 bg-gray-400 text-black px-4 py-2 rounded shadow">
-          {notification}
+        <div className="fixed bottom-5 right-5 flex items-start gap-3 bg-[#111111] text-white px-4 py-3 rounded-xl shadow-[0_8px_32px_rgba(0,0,0,0.5)] border border-yellow-400/20 animate-in fade-in slide-in-from-bottom-4 duration-300 min-w-[280px] max-w-[360px]">
+          <div className="w-1 self-stretch rounded-full bg-yellow-400 shrink-0" />
+
+          <div className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-yellow-400/15 text-yellow-400">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="14"
+              height="14"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2.5"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
+              <polyline points="20 6 9 17 4 12" />
+            </svg>
+          </div>
+
+          <div className="flex-1 min-w-0">
+            <p className="text-xs font-semibold uppercase tracking-widest text-yellow-400 mb-0.5">
+              Notificación
+            </p>
+            <p className="text-sm text-white/85 leading-snug">{notification}</p>
+          </div>
+          <button className="shrink-0 mt-0.5 text-white/30 hover:text-yellow-400 transition-colors duration-150">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="14"
+              height="14"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2.5"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
+              <line x1="18" y1="6" x2="6" y2="18" />
+              <line x1="6" y1="6" x2="18" y2="18" />
+            </svg>
+          </button>
         </div>
       )}
     </div>

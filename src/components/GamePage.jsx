@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect, useCallback, useRef } from "react";
 import MovieCard from "./MovieCard";
 import { Target, Trophy, RotateCcw } from "lucide-react";
 import { supabase } from "../supabaseClient";
@@ -10,6 +10,7 @@ const GamePage = () => {
   const [score, setScore] = useState(0);
   const [highScore, setHighScore] = useState(0);
   const [movies, setMovies] = useState([]);
+  const [user, setUser] = useState(null);
 
   useEffect(() => {
     const fetchMovies = async () => {
@@ -32,6 +33,83 @@ const GamePage = () => {
     const shuffled = [...movies].sort(() => 0.5 - Math.random());
     return shuffled.slice(0, count);
   };
+
+  const scoreRef = useRef(0);
+
+  useEffect(() => {
+    scoreRef.current = score;
+  }, [score]);
+
+  const getUser = async () => {
+    const { data, error } = await supabase.auth.getUser();
+    if (error) {
+      console.error(error);
+      return null;
+    }
+    return data.user;
+  };
+
+  const updateHighScore = async (newScore) => {
+    if (!user) return;
+
+    const { error } = await supabase
+      .from("max_score")
+      .update({ max_score: newScore })
+      .eq("user_id", user.id);
+
+    if (error) {
+      console.error("Error updating high score:", error);
+    }
+  };
+
+  useEffect(() => {
+    const fetchUser = async () => {
+      const { data, error } = await supabase.auth.getUser();
+      if (error) {
+        console.error(error);
+        return;
+      }
+      setUser(data.user);
+    };
+
+    fetchUser();
+  }, []);
+
+  useEffect(() => {
+    if (!user) return;
+
+    const fetchHighScore = async () => {
+      const { data, error } = await supabase
+        .from("max_score")
+        .select("*")
+        .eq("user_id", user.id)
+        .maybeSingle();
+
+      if (error && error.code !== "PGRST116") {
+        console.error("Error fetching score:", error);
+        return;
+      }
+
+      if (!data) {
+        const { data: newData, error: insertError } = await supabase
+          .from("max_score")
+          .insert([{ user_id: user.id, max_score: 0 }])
+          .select()
+          .maybeSingle();
+
+        if (insertError) {
+          console.error(insertError);
+          return;
+        }
+
+        setHighScore(newData.max_score);
+      } else {
+        setHighScore(data.max_score);
+      }
+    };
+
+    fetchHighScore();
+  }, [user]);
 
   const startNewRound = useCallback(() => {
     setCurrentMovies(getRandomMovies(2));
@@ -62,18 +140,19 @@ const GamePage = () => {
     } else if (date2 < date1) {
       if (movie.id === movie2.id) isCorrect = true;
     } else {
-      isCorrect = true; // Tie
+      isCorrect = true;
     }
 
     if (isCorrect) {
-      setScore((s) => {
-        const newScore = s + 1;
-        if (newScore > highScore) setHighScore(newScore);
-        return newScore;
-      });
+      setScore((s) => s + 1);
       setTimeout(() => startNewRound(), 2500);
       setGameState("correct");
     } else {
+      if (scoreRef.current > highScore) {
+        setHighScore(scoreRef.current);
+        updateHighScore(scoreRef.current);
+      }
+
       setScore(0);
       setGameState("wrong");
     }
@@ -133,7 +212,7 @@ const GamePage = () => {
               <h2 className="text-2xl mb-1">{movie.title}</h2>
               {gameState !== "playing" && (
                 <div className="text-primary text-xl font-semibold mt-2">
-                  {movie.release_date.split("-")[0]}
+                  {movie.release_date}
                 </div>
               )}
             </div>
@@ -161,14 +240,14 @@ const GamePage = () => {
         {gameState === "wrong" && (
           <>
             <div className="text-3xl font-extrabold font-display bg-clip-text text-error animate-[fadeIn_0.3s_ease-out]">
-              Game Over!
+              Perdiste !!
             </div>
             <button
               className="bg-white text-black px-12 py-4 rounded-full text-xl font-bold ml-8 transition-transform duration-200 animate-[popIn_0.3s_ease-out] hover:scale-105 hover:bg-primary"
               onClick={startNewRound}
             >
               <RotateCcw size={20} className="inline mr-2 align-middle" />
-              Try Again
+              Juega otra vez
             </button>
           </>
         )}
